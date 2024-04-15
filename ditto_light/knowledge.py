@@ -70,7 +70,7 @@ class ProductDKInjector(DKInjector):
             str: the transformed entry
         """
         res = ''
-        doc = self.nlp(entry, disable=['tagger', 'parser'])
+        doc = self.nlp(entry, disable=['tagger', 'parser', 'lemmatizer'])
         ents = doc.ents
         start_indices = {}
         end_indices = {}
@@ -127,7 +127,7 @@ class GeneralDKInjector(DKInjector):
             str: the transformed entry
         """
         res = ''
-        doc = self.nlp(entry, disable=['tagger', 'parser'])
+        doc = self.nlp(entry, disable=['tagger', 'parser', 'lemmatizer'])
         ents = doc.ents
         start_indices = {}
         end_indices = {}
