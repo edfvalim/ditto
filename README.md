@@ -16,9 +16,11 @@ For more technical details, see the [Deep Entity Matching with Pre-Trained Langu
 
 Install required packages
 ```
-conda install -c conda-forge nvidia-apex
+conda create -n ditto python==3.7.7
+conda activate ditto
 pip install -r requirements.txt
 python -m spacy download en_core_web_lg
+python -c "import nltk; nltk.download('stopwords')"
 ```
 
 ## The EM pipeline
