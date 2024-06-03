@@ -8,6 +8,8 @@ import random
 import numpy as np
 import sklearn.metrics as metrics
 import argparse
+import csv
+from datetime import datetime
 
 from .dataset import DittoDataset
 from torch.utils import data
@@ -17,6 +19,42 @@ from tensorboardX import SummaryWriter
 
 lm_mp = {'roberta': 'roberta-base',
          'distilbert': 'distilbert-base-uncased'}
+
+def save_metrics_to_csv(file_path, run_tag, hp, epoch, dev_f1, test_f1, best_dev_f1, best_test_f1):
+    """Save evaluation metrics to a CSV file.
+    
+    Args:
+        file_path (str): The path to the CSV file.
+        run_tag (str): The tag of the run.
+        hp (Namespace): Hyper-parameters.
+        epoch (int): The current epoch.
+        dev_f1 (float): The F1 score on the validation set.
+        test_f1 (float): The F1 score on the test set.
+        best_dev_f1 (float): The best F1 score on the validation set so far.
+        best_test_f1 (float): The best F1 score on the test set so far.
+    """
+    fieldnames = ['timestamp', 'run_tag', 'epoch', 'dev_f1', 'test_f1', 'best_dev_f1', 'best_test_f1'] + list(vars(hp).keys())
+    file_exists = os.path.isfile(file_path)
+    
+    with open(file_path, mode='a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        
+        if not file_exists:
+            writer.writeheader()
+        
+        row = {
+            'timestamp': datetime.now().isoformat(),
+            'run_tag': run_tag,
+            'epoch': epoch,
+            'dev_f1': dev_f1,
+            'test_f1': test_f1,
+            'best_dev_f1': best_dev_f1,
+            'best_test_f1': best_test_f1
+        }
+        row.update(vars(hp))
+        
+        writer.writerow(row)
+
 
 class DittoModel(nn.Module):
     """A baseline model for EM."""
@@ -232,4 +270,6 @@ def train(trainset, validset, testset, run_tag, hp):
                    't_f1': test_f1}
         writer.add_scalars(run_tag, scalars, epoch)
 
+        # Save final metrics to CSV after training is complete
+    save_metrics_to_csv(os.path.join(hp.logdir, 'metrics.csv'), run_tag, hp, epoch, dev_f1, test_f1, best_dev_f1, best_test_f1)
     writer.close()
